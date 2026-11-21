@@ -1,0 +1,133 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>麻将换牌模拟器</title>
+<style>
+body{margin:0;padding:18px;background:#126044;color:white;font-family:Arial,sans-serif}
+h2{text-align:center}
+.panel{background:#fff;color:#222;padding:14px;border-radius:14px;margin:12px 0}
+.hand{display:flex;flex-wrap:wrap;gap:7px;justify-content:center}
+.tile{background:#fff;color:#b21d24;border:2px solid #ddd;border-radius:7px;padding:12px 7px;font-size:18px;font-weight:bold;min-width:38px}
+.tile.selected{border:3px solid #ff9800;background:#fff2c9}
+button.action{padding:11px 14px;border:0;border-radius:8px;background:#e7b94c;color:#222;font-size:15px;margin:4px}
+.small{font-size:13px;color:#666}
+</style>
+</head>
+<body>
+<h2>🀄 离线麻将换牌模拟器</h2>
+
+<div class="panel">
+<b>我的手牌</b>
+<div id="hand" class="hand"></div>
+<p class="small">先点击一张手牌，再点击下面的麻将，即可换牌。</p>
+</div>
+
+<div class="panel">
+<b>选择要换入的麻将</b>
+<div id="pool" class="hand"></div>
+</div>
+
+<div style="text-align:center">
+<button class="action" onclick="draw()">摸一张</button>
+<button class="action" onclick="discard()">出掉选中的牌</button>
+<button class="action" onclick="randomHand()">重新发牌</button>
+<button class="action" onclick="reset()">清空手牌</button>
+</div>
+
+<div class="panel">
+<b>操作提示</b>
+<p id="msg">点击手牌开始换牌。</p>
+<p id="count"></p>
+</div>
+
+<script>
+const tiles=[];
+for(let i=1;i<=9;i++){
+ tiles.push(i+"筒",i+"条",i+"万");
+}
+tiles.push("东风","南风","西风","北风","红中","发财","白板");
+
+let hand=[];
+let selected=-1;
+
+function makePool(){
+ const pool=document.getElementById("pool");
+ pool.innerHTML="";
+ tiles.forEach(t=>{
+  const b=document.createElement("button");
+  b.className="tile";
+  b.textContent=t;
+  b.onclick=()=>swap(t);
+  pool.appendChild(b);
+ });
+}
+
+function render(){
+ const box=document.getElementById("hand");
+ box.innerHTML="";
+ hand.forEach((t,i)=>{
+  const b=document.createElement("button");
+  b.className="tile"+(selected===i?" selected":"");
+  b.textContent=t;
+  b.onclick=()=>{
+   selected=i;
+   say("已选中："+t+"，请在下面选择要换入的牌。");
+   render();
+  };
+  box.appendChild(b);
+ });
+ document.getElementById("count").textContent="当前手牌："+hand.length+"张";
+}
+
+function say(s){document.getElementById("msg").textContent=s;}
+
+function swap(t){
+ if(selected<0){say("请先点击一张手牌。");return;}
+ const old=hand[selected];
+ hand[selected]=t;
+ selected=-1;
+ render();
+ say("已将 "+old+" 换成 "+t);
+}
+
+function draw(){
+ if(hand.length>=14){say("手牌已达到14张，请先出牌。");return;}
+ const t=tiles[Math.floor(Math.random()*tiles.length)];
+ hand.push(t);
+ render();
+ say("摸到："+t);
+}
+
+function discard(){
+ if(selected<0){say("请先选择一张要打出的牌。");return;}
+ const t=hand.splice(selected,1)[0];
+ selected=-1;
+ render();
+ say("已打出："+t);
+}
+
+function randomHand(){
+ hand=[];
+ for(let i=0;i<13;i++){
+  hand.push(tiles[Math.floor(Math.random()*tiles.length)]);
+ }
+ selected=-1;
+ render();
+ say("已重新随机发出13张牌。");
+}
+
+function reset(){
+ hand=[];
+ selected=-1;
+ render();
+ say("手牌已清空。");
+}
+
+makePool();
+randomHand();
+</script>
+</body>
+</html>
