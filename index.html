@@ -129,5 +129,20 @@ function reset(){
 makePool();
 randomHand();
 </script>
+<div class="panel">
+  <b>上传麻将截图</b>
+  <input type="file" id="screenshot" accept="image/*" style="width:100%;margin-top:12px">
+  <img id="preview" alt="截图预览" style="display:none;width:100%;margin-top:12px">
+</div>
+
+<script>
+document.getElementById("screenshot").addEventListener("change", function(e) {
+  const file = e.target.files[0];
+  const preview = document.getElementById("preview");
+  if (!file) return;
+  preview.src = URL.createObjectURL(file);
+  preview.style.display = "block";
+});
+</script>
 </body>
 </html>
